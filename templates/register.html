@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ title }}</h1>
+<form action="/register" method="post">
+    <div class="row">
+        <p>すべて必須項目です</p>
+    </div>
+    <div class="row">
+        <div class="col-auto">
+            <div class="form-floating">
+                <input class="form-control" type="text" name="id" id="id" placeholder="ユーザIDを入力...">
+                <label for="id" class="col-form-label">ユーザID</label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-auto">
+            <div class="form-floating">
+                <input class="form-control" type="password" name="password" id="password" placeholder="パスワードを入力...">
+                <label for="password" class="col-form-label">パスワード</label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-auto">
+            <div class="form-floating">
+                <input class="form-control" type="text" name="lastname" id="lastname" placeholder="姓を入力...">
+                <label for="lastname" class="col-form-label">姓</label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-auto">
+            <div class="form-floating">
+                <input class="form-control" type="text" name="firstname" id="firstname" placeholder="名を入力...">
+                <label for="firstname" class="col-form-label">名</label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-auto">
+            <input class="btn btn-primary" type="submit" value="登録">
+        </div>
+    </div>
+</form>
+{% endblock content %}

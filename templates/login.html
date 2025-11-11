@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ title }}</h1>
+<form action="/login" method="post">
+    <div class="row">
+        <div class="col-auto">
+            <div class="form-floating">
+                <input class="form-control" type="text" name="id" id="id" placeholder="ユーザIDを入力...">
+                <label for="id" class="col-form-label">ユーザID</label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-auto">
+            <div class="form-floating">
+                <input class="form-control" type="password" name="password" id="password" placeholder="パスワードを入力">
+                <label for="password" class="col-form-label">パスワード</label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-auto">
+            <input class="btn btn-primary" type="submit" value="ログイン">
+            <a href="/register">新規ユーザ登録</a>
+        </div>
+    </div>
+</form>
+{% endblock content %}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <title>{{ title }}</title>
+</head>
+<body>
+    {% if current_user.is_authenticated: %}
+    <header>
+        <nav class="navbar bg-body-secondary">
+            <div class="container-fluid">
+                <a href="/" class="nav-link">タスク一覧</a>
+                <a href="/users" class="nav-link">ユーザ一覧</a>
+                <div class="nav-item">
+                    {{ current_user.id }} さん
+                    <a href="/logout"><span class="btn btn-primary btn-sm">ログアウト</span></a>
+                </div>
+            </div>
+        </nav>
+    </header>
+    {% endif %}
+    <aside>
+        <div class="container-fluid">
+            {% for message in get_flashed_messages(): %}
+            <div class="alert alert-warning alert-dismissible fade show">
+                <p>{{ message }}</p>
+                <span class="btn-close" data-bs-dismiss="alert" aria-label="閉じる"></span>
+            </div>
+            {% endfor %}
+        </div>
+    </aside>
+    <main>
+        <div class="container-fluid">
+            {% block content %}
+            {% endblock content %}
+        </div>
+    </main>
+</body>
+</html>

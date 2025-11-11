@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>ユーザ一覧</h1>
+<table>
+    <thead>
+        <tr>
+            <th>id</th>
+            <th>氏名</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users: %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.lastname }} {{ user.firstname}}</td>
+            {% if current_user in user.followers %}
+            <td>
+                <a href="/unfollow/{{ user.id }}">フォロー解除</a>
+            </td>
+            {% else: %}
+            <td>
+                <a href="/follow/{{ user.id }}">フォローする</a>
+            </td>
+            {% endif %}
+        </tr>
+        {% else: %}
+        <tr>
+            <td colspan="3">表示する情報がありません</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock content %}
