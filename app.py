@@ -91,14 +91,8 @@ def create():
     task = Task(
         user=current_user,
         name=request.form["name"],
-<<<<<<< HEAD
-        deadline=request.form["deadline"],
-        is_shared=request.form.get("is_shared") is not None,
-        color=request.form["color"],
-=======
         deadline=request.form["deadline"] or None,
         is_shared=request.form.get("is_shared") is not None,  # フォームの内容で共有フラグを更新
->>>>>>> f3297a50bae59b26686239e2fb793885689f3921
     )
     db.session.add(task)  # 用意したタスクを保存
     db.session.commit()  # 保存した状態をDBに反映
