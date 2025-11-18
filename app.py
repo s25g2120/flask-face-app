@@ -170,3 +170,19 @@ def unfollow(user_id):
     else:
         flash("フォローしていません")
     return redirect("/users")
+
+
+@app.route("/update_user", methods=["GET", "POST"])
+@login_required
+def update_user():
+    user = current_user
+    if request.method == "POST":
+        user.firstname = request.form["firstname"]
+        user.lastname = request.form["lastname"]
+        password = request.form["password"]
+        if password:
+            user.password_hash = generate_password_hash(password)
+        db.session.commit()
+        flash("ユーザ情報を更新しました")
+        return redirect("/")
+    return render_template("update_user.html", user=user, title="ユーザ情報の編集")

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ title }}</h1>
+<form action="/update_user" method="post">
+    <div class="row">
+        <p>すべて必須項目です</p>
+    </div>
+    <div class="row">
+        <div class="col-auto">
+            <div class="form-floating">
+                <input class="form-control" type="text" name="id" id="id" value="{{ user.id }}" readonly>
+                <label for="id" class="col-form-label">ユーザID（変更不可）</label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-auto">
+            <div class="form-floating">
+                <input class="form-control" type="password" name="password" id="password" placeholder="新しいパスワードを入力...">
+                <label for="password" class="col-form-label">パスワード</label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-auto">
+            <div class="form-floating">
+                <input class="form-control" type="text" name="lastname" id="lastname"   value="{{ user.lastname }}" required placeholder="姓を入力...">
+                <label for="lastname" class="col-form-label">姓</label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-auto">
+            <div class="form-floating">
+                <input class="form-control" type="text" name="firstname" id="firstname" value="{{ user.firstname }}" required placeholder="名を入力...">
+                <label for="firstname" class="col-form-label">名</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-auto">
+            <input class="btn btn-primary" type="submit" value="更新して登録">
+        </div>
+    </div>
+    <a href="/login">タスク一覧に戻る</a>
+</form>
+{% endblock content %}
