@@ -2,6 +2,7 @@ from flask import Flask, flash, redirect, render_template, request
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 from flask_migrate import Migrate
 from models import Task, User, db
+from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://db_user:db_password@localhost/app_db"  # 接続先DBを定義
@@ -90,9 +91,14 @@ def create():
     task = Task(
         user=current_user,
         name=request.form["name"],
+<<<<<<< HEAD
         deadline=request.form["deadline"],
         is_shared=request.form.get("is_shared") is not None,
         color=request.form["color"],
+=======
+        deadline=request.form["deadline"] or None,
+        is_shared=request.form.get("is_shared") is not None,  # フォームの内容で共有フラグを更新
+>>>>>>> f3297a50bae59b26686239e2fb793885689f3921
     )
     db.session.add(task)  # 用意したタスクを保存
     db.session.commit()  # 保存した状態をDBに反映
@@ -112,7 +118,7 @@ def update(task_id):  # URL末尾のtask_idを引数task_idとして受け取る
         return render_template("update.html", title="更新", task=task)
     # POSTメソッドのときの処理
     task.name = request.form["name"]  # フォームの内容でタスク名を更新
-    task.deadline = request.form["deadline"]  # フォームの内容で締切日時を更新
+    task.deadline = request.form["deadline"] or None  # フォームの内容で締切日時を更新
     task.is_shared = request.form.get("is_shared") is not None  # フォームの内容で締切日時を更新
     db.session.commit()  # 更新をDBに反映
     return redirect("/")  # 更新をDBに反映

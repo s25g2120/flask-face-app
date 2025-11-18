@@ -17,8 +17,18 @@
         <div class="col-auto">
             <div class="form-floating">
                 <input class="form-control" type="password" name="password" id="password" placeholder="新しいパスワードを入力...">
-                <label for="password" class="col-form-label">パスワード</label>
+                <label for="password" class="col-form-label">パスワード（更新であれば入力）</label>
+                <button type="button" onmousedown="showPassword()" onmouseup="hidePassword()" onmouseleave="hidePassword()" class="btn btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-2" onclick="togglePassword()" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); background: none; border: none; font-size: 1.2rem; cursor: pointer; z-index: 2;">🙈</button>
             </div>
+            <script>
+            function showPassword() {
+                document.getElementById("password").type = "text";
+            }
+            function hidePassword() {
+                document.getElementById("password").type = "password";
+            }
+            </script>
+
         </div>
     </div>
     <div class="row">
