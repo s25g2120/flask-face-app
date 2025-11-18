@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ title }}</h1>
+<form action="/update_user" method="post">
+    <div class="row">
+        <p>すべて必須項目です</p>
+    </div>
+    <div class="row">
+        <div class="col-auto">
+            <div class="form-floating">
+                <input class="form-control" type="text" name="id" id="id" value="{{ user.id }}" readonly>
+                <label for="id" class="col-form-label">ユーザID（変更不可）</label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-auto">
+            <div class="form-floating">
+                <input class="form-control" type="password" name="password" id="password" placeholder="新しいパスワードを入力...">
+                <label for="password" class="col-form-label">パスワード（更新であれば入力）</label>
+                <button type="button" onmousedown="showPassword()" onmouseup="hidePassword()" onmouseleave="hidePassword()" class="btn btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-2" onclick="togglePassword()" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); background: none; border: none; font-size: 1.2rem; cursor: pointer; z-index: 2;">🙈</button>
+            </div>
+            <script>
+            function showPassword() {
+                document.getElementById("password").type = "text";
+            }
+            function hidePassword() {
+                document.getElementById("password").type = "password";
+            }
+            </script>
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-auto">
+            <div class="form-floating">
+                <input class="form-control" type="text" name="lastname" id="lastname"   value="{{ user.lastname }}" required placeholder="姓を入力...">
+                <label for="lastname" class="col-form-label">姓</label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-auto">
+            <div class="form-floating">
+                <input class="form-control" type="text" name="firstname" id="firstname" value="{{ user.firstname }}" required placeholder="名を入力...">
+                <label for="firstname" class="col-form-label">名</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-auto">
+            <input class="btn btn-primary" type="submit" value="更新して登録">
+        </div>
+    </div>
+    <a href="/login">タスク一覧に戻る</a>
+</form>
+{% endblock content %}

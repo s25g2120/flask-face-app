@@ -1,8 +1,8 @@
 from flask import Flask, flash, redirect, render_template, request
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 from flask_migrate import Migrate
-
 from models import Task, User, db
+from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://db_user:db_password@localhost/app_db"  # 接続先DBを定義
@@ -91,7 +91,7 @@ def create():
     task = Task(
         user=current_user,
         name=request.form["name"],
-        deadline=request.form["deadline"],
+        deadline=request.form["deadline"] or None,
         is_shared=request.form.get("is_shared") is not None,  # フォームの内容で共有フラグを更新
     )
     db.session.add(task)  # 用意したタスクを保存
@@ -112,7 +112,7 @@ def update(task_id):  # URL末尾のtask_idを引数task_idとして受け取る
         return render_template("update.html", title="更新", task=task)
     # POSTメソッドのときの処理
     task.name = request.form["name"]  # フォームの内容でタスク名を更新
-    task.deadline = request.form["deadline"]  # フォームの内容で締切日時を更新
+    task.deadline = request.form["deadline"] or None  # フォームの内容で締切日時を更新
     task.is_shared = request.form.get("is_shared") is not None  # フォームの内容で締切日時を更新
     db.session.commit()  # 更新をDBに反映
     return redirect("/")  # 更新をDBに反映
@@ -138,9 +138,15 @@ def delete(task_id):  # URL末尾のtask_idを引数task_idとして受け取る
 @app.route("/users")
 @login_required
 def users():
-    users = User.query.all()
-    users.remove(current_user)  # 自身を除く
-    return render_template("users.html", users=users)
+    users = User.query.filter(User.id != current_user.id).all()  # 自分以外のユーザ一覧
+    followees = current_user.followees  # 自分がフォローしているユーザ
+    followers = current_user.followers  # 自分をフォローしているユーザ
+    return render_template(
+        "users.html",
+        users=users,
+        followees=followees,
+        followers=followers,
+    )
 
 
 @app.route("/follow/<string:user_id>")
@@ -165,3 +171,19 @@ def unfollow(user_id):
     else:
         flash("フォローしていません")
     return redirect("/users")
+
+
+@app.route("/update_user", methods=["GET", "POST"])
+@login_required
+def update_user():
+    user = current_user
+    if request.method == "POST":
+        user.firstname = request.form["firstname"]
+        user.lastname = request.form["lastname"]
+        password = request.form["password"]
+        if password:
+            user.password_hash = generate_password_hash(password)
+        db.session.commit()
+        flash("ユーザ情報を更新しました")
+        return redirect("/")
+    return render_template("update_user.html", user=user, title="ユーザ情報の編集")
