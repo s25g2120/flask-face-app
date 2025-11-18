@@ -1,7 +1,6 @@
 from flask import Flask, flash, redirect, render_template, request
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 from flask_migrate import Migrate
-
 from models import Task, User, db
 
 app = Flask(__name__)
@@ -138,9 +137,15 @@ def delete(task_id):  # URL末尾のtask_idを引数task_idとして受け取る
 @app.route("/users")
 @login_required
 def users():
-    users = User.query.all()
-    users.remove(current_user)  # 自身を除く
-    return render_template("users.html", users=users)
+    users = User.query.filter(User.id != current_user.id).all()  # 自分以外のユーザ一覧
+    followees = current_user.followees  # 自分がフォローしているユーザ
+    followers = current_user.followers  # 自分をフォローしているユーザ
+    return render_template(
+        "users.html",
+        users=users,
+        followees=followees,
+        followers=followers,
+    )
 
 
 @app.route("/follow/<string:user_id>")

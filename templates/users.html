@@ -10,25 +10,44 @@
         </tr>
     </thead>
     <tbody>
-        {% for user in users: %}
+        {% for user in users %}
         <tr>
             <td>{{ user.id }}</td>
-            <td>{{ user.lastname }} {{ user.firstname}}</td>
-            {% if current_user in user.followers %}
+            <td>{{ user.lastname }} {{ user.firstname }}</td>
             <td>
-                <a href="/unfollow/{{ user.id }}">フォロー解除</a>
+                {% set follower_list = user.followers.all() if user.followers.all is defined else user.followers %}
+                {% if current_user in follower_list %}
+                    <a href="/unfollow/{{ user.id }}">フォロー解除</a>
+                {% else %}
+                    <a href="/follow/{{ user.id }}">フォローする</a>
+                {% endif %}
             </td>
-            {% else: %}
-            <td>
-                <a href="/follow/{{ user.id }}">フォローする</a>
-            </td>
-            {% endif %}
         </tr>
-        {% else: %}
+        {% else %}
         <tr>
             <td colspan="3">表示する情報がありません</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
+<hr>
+
+<h2>フォロー中のユーザ</h2>
+<ul>
+    {% for user in followees %}
+        <li>{{ user.lastname }} {{ user.firstname }}（ID: {{ user.id }}）</li>
+    {% else %}
+        <li>フォローしているユーザはいません</li>
+    {% endfor %}
+</ul>
+
+<h2>あなたをフォローしているユーザ</h2>
+<ul>
+    {% for user in followers %}
+        <li>{{ user.lastname }} {{ user.firstname }}（ID: {{ user.id }}）</li>
+    {% else %}
+        <li>フォロワーはいません</li>
+    {% endfor %}
+</ul>
 {% endblock content %}

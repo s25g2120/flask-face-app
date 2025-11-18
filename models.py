@@ -42,8 +42,8 @@ class User(UserMixin, db.Model):
         secondary=follows,
         primaryjoin=(follows.c.follower_id == id),
         secondaryjoin=(follows.c.followee_id == id),
-        backref=db.backref("followers"),
-        lazy=True,
+        backref=db.backref("followers", lazy="dynamic"),  # ← lazy="dynamic" を追加
+        lazy="dynamic",
     )
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)  # 作成日時
 
