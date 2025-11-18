@@ -91,7 +91,8 @@ def create():
         user=current_user,
         name=request.form["name"],
         deadline=request.form["deadline"],
-        is_shared=request.form.get("is_shared") is not None,  # フォームの内容で共有フラグを更新
+        is_shared=request.form.get("is_shared") is not None,
+        color=request.form["color"],
     )
     db.session.add(task)  # 用意したタスクを保存
     db.session.commit()  # 保存した状態をDBに反映

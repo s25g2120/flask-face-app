@@ -26,6 +26,7 @@ class Task(db.Model):
     deadline = db.Column(db.DateTime, nullable=False)  # 締切
     is_shared = db.Column(db.Boolean, nullable=False, default=False)  # 共有フラグ
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)  # 作成日時
+    color = db.Column(db.String(20), nullable=True)  # 例: "red", "blue", "green"
 
 
 class User(UserMixin, db.Model):
