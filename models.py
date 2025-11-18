@@ -23,9 +23,9 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)  # 一意なID（整数）
     user_id = db.Column(db.String(255), db.ForeignKey("users.id"), nullable=True)
     name = db.Column(db.String(255), nullable=False)  # タスク名
-    deadline = db.Column(db.DateTime, nullable=False)  # 締切
+    deadline = db.Column(db.DateTime, nullable=True)  # 締切
     is_shared = db.Column(db.Boolean, nullable=False, default=False)  # 共有フラグ
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)  # 作成日時
+    created_at =  db.Column(db.DateTime, nullable=False, default=datetime.now)  # 作成日時
 
 
 class User(UserMixin, db.Model):
@@ -35,7 +35,6 @@ class User(UserMixin, db.Model):
     id = db.Column(db.String(255), primary_key=True)  # ユーザID
     password_hash = db.Column(db.String(162), nullable=True)
     lastname = db.Column(db.String(255), nullable=False)
-    firstname = db.Column(db.String(255), nullable=False)
     tasks = db.relationship("Task", backref="user", lazy=True)
     followees = db.relationship(
         "User",
