@@ -10,7 +10,7 @@
         </div>
         <div class="col-auto">
             <div class="form-floating">
-                <input class="form-control" type="datetime-local" name="deadline" id="deadline" required>
+                <input class="form-control" type="datetime-local" name="deadline" id="deadline">
                 <label for="deadline" class="col-form-label">締切日時</label>
             </div>
         </div>
@@ -39,7 +39,7 @@
         <tr>
             <td>{{ task.id }}</td>
             <td>{{ task.name }}</td>
-            <td>{{ task.deadline }}</td>
+            <td>{% if task.deadline %}{{ task.deadline }}{% endif %}</td>
             <td>
                 {% if task.is_shared: %}
                 <span class="badge text-bg-primary">✓</span>
@@ -76,7 +76,7 @@
             <td>{{ task.id }}</td>
             <td>{{ task.user_id }}</td>
             <td>{{ task.name }}</td>
-            <td>{{ task.deadline }}</td>
+            <td>{% if task.deadline %}{{ task.deadline }}{% endif %}</td>
             <td>{{ task.created_at }}</td>
         </tr>
         {% else: %}

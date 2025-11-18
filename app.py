@@ -91,7 +91,7 @@ def create():
     task = Task(
         user=current_user,
         name=request.form["name"],
-        deadline=request.form["deadline"],
+        deadline=request.form["deadline"] or None,
         is_shared=request.form.get("is_shared") is not None,  # フォームの内容で共有フラグを更新
     )
     db.session.add(task)  # 用意したタスクを保存
@@ -112,7 +112,7 @@ def update(task_id):  # URL末尾のtask_idを引数task_idとして受け取る
         return render_template("update.html", title="更新", task=task)
     # POSTメソッドのときの処理
     task.name = request.form["name"]  # フォームの内容でタスク名を更新
-    task.deadline = request.form["deadline"]  # フォームの内容で締切日時を更新
+    task.deadline = request.form["deadline"] or None  # フォームの内容で締切日時を更新
     task.is_shared = request.form.get("is_shared") is not None  # フォームの内容で締切日時を更新
     db.session.commit()  # 更新をDBに反映
     return redirect("/")  # 更新をDBに反映
