@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ title }}</h1>
+<form action="/delete_user" method="post">
+    <div class="row">
+        <p class="text-danger">この操作は取り消せません。ユーザ情報を削除してもよろしいですか？</p>
+    </div>
+
+    <div class="row">
+        <div class="col-auto">
+            <div class="form-floating">
+                <input class="from-control" type="text" name="id" id="id" value="{{ user.id }}" readonly>
+                <label for="id" class="col-form-label">ユーザID（削除対象）</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-auto">
+            <label>
+                <input type="checkbox" name="confirm" required>本当に削除することを確認しました。
+            </label>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-auto">
+            <input class="btn btn-danger" type="submit" value="ユーザを削除する">
+        </div>
+        <div class="col-auto">
+            <a href="/login" class="btn btn-secondary">キャンセル</a>
+        </div>
+    </div>
+</form>
+{% endblock content %}
