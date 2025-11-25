@@ -88,6 +88,7 @@ def index():
 @app.route("/create", methods=["GET", "POST"])
 @login_required
 def create():
+    color = request.form.get("color")
     task = Task(
         user=current_user,
         name=request.form["name"],
@@ -136,6 +137,30 @@ def delete(task_id):  # URL末尾のtask_idを引数task_idとして受け取る
     db.session.delete(task)
     db.session.commit()  # 更新をDBに反映
     return redirect("/")  # タスク一覧に戻る
+
+
+@app.route("/delete_bulk_confirm", methods=["POST"])
+@login_required
+def delete_bulk_confirm():
+    ids = request.form.getlist("task_ids")
+    if not ids:
+        return redirect("/")  # 何も選んでなければ一覧に戻る
+
+    tasks = Task.query.filter(Task.id.in_(ids), Task.user == current_user).all()
+    return render_template("delete_bulk_confirm.html", tasks=tasks, ids=ids)
+
+
+@app.route("/delete_bulk", methods=["POST"])
+@login_required
+def delete_bulk():
+    ids = request.form.getlist("task_ids")
+
+    for task_id in ids:
+        task = Task.query.get(task_id)
+        if task and task.user == current_user:
+            db.session.delete(task)
+    db.session.commit()
+    return redirect("/")
 
 
 @app.route("/users")
