@@ -92,7 +92,8 @@ def create():
         user=current_user,
         name=request.form["name"],
         deadline=request.form["deadline"] or None,
-        is_shared=request.form.get("is_shared") is not None,  # フォームの内容で共有フラグを更新
+        is_shared=request.form.get("is_shared") is not None,
+        color=request.form.get("color") or "black",  # ← 色を保存
     )
     db.session.add(task)  # 用意したタスクを保存
     db.session.commit()  # 保存した状態をDBに反映
@@ -114,6 +115,8 @@ def update(task_id):  # URL末尾のtask_idを引数task_idとして受け取る
     task.name = request.form["name"]  # フォームの内容でタスク名を更新
     task.deadline = request.form["deadline"] or None  # フォームの内容で締切日時を更新
     task.is_shared = request.form.get("is_shared") is not None  # フォームの内容で締切日時を更新
+    task.color = request.form.get("color") or task.color  # ← 色を更新
+
     db.session.commit()  # 更新をDBに反映
     return redirect("/")  # 更新をDBに反映
 
