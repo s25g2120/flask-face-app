@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>選択したタスクを削除しますか？</h2>
+<ul>
+    {% for task in tasks %}
+        <li>{{ task.name }} (締切: {{ task.deadline }})</li>
+    {% endfor %}
+</ul>
+
+<form action="/delete_bulk" method="post">
+    {% for id in ids %}
+    <input type="hidden" name="task_ids" value="{{ id }}">
+    {% endfor %}
+    <input type="submit" value="削除する" class="btn btn-danger">
+    <a href="/" class="btn btn-secondary">キャンセル</a>
+</form>
+{% endblock %}
