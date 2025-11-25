@@ -10,13 +10,29 @@
         </div>
         <div class="col-auto">
             <div class="form-floating">
-                <input class="form-control" type="datetime-local" name="deadline" id="deadline" value="{{ task.deadline }}">
+                <input class="form-control" type="datetime-local" name="deadline" id="deadline" 
+                       value="{{ task.deadline|default('', true) }}">
                 <label for="deadline" class="col-form-label">締切日時</label>
             </div>
         </div>
         <div class="col-auto">
-            <input class="form-check-input" type="checkbox" name="is_shared" id="is_shared" {{ "checked" if task.is_shared }}>
+            <input class="form-check-input" type="checkbox" name="is_shared" id="is_shared" 
+                   {% if task.is_shared %}checked{% endif %}>
             <label for="is_shared" class="form-check-label">共有する</label>
+        </div>
+        <div class="col-auto">
+            <div class="form-floating">
+                <select class="form-select" name="color" id="color">
+                    <option value="red" {% if task.color == "red" %}selected{% endif %}>赤</option>
+                    <option value="blue" {% if task.color == "blue" %}selected{% endif %}>青</option>
+                    <option value="green" {% if task.color == "green" %}selected{% endif %}>緑</option>
+                    <option value="orange" {% if task.color == "orange" %}selected{% endif %}>オレンジ</option>
+                    <option value="gray" {% if task.color == "gray" %}selected{% endif %}>グレー</option>
+                </select>
+                <label for="color">色</label>
+            </div>
+        </div>
+        <div class="col-auto">
             <input class="form-control btn btn-primary" type="submit" value="更新">
         </div>
     </div>
