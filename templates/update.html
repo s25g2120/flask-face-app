@@ -23,6 +23,7 @@
         <div class="col-auto">
             <div class="form-floating">
                 <select class="form-select" name="color" id="color">
+                    <option value="red" {% if task.color == "black" %}selected{% endif %}>黒</option>
                     <option value="red" {% if task.color == "red" %}selected{% endif %}>赤</option>
                     <option value="blue" {% if task.color == "blue" %}selected{% endif %}>青</option>
                     <option value="green" {% if task.color == "green" %}selected{% endif %}>緑</option>
