@@ -16,6 +16,17 @@ follows = db.Table(
 )
 
 
+class Notification(db.Model):
+    __tablename__ = "notifications"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(255), db.ForeignKey("users.id"), nullable=False)
+    message = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    is_read = db.Column(db.Boolean, nullable=False, default=False)
+
+    user = db.relationship("User", backref="notifications")
+
 class Task(db.Model):
     # タスクを登録するためのモデル
     __tablename__ = "tasks"  # データベース内部で使用する名前（テーブル名）
@@ -36,6 +47,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.String(255), primary_key=True)  # ユーザID
     password_hash = db.Column(db.String(162), nullable=True)
     lastname = db.Column(db.String(255), nullable=False)
+    firstname = db.Column(db.String(255), nullable=False)
     tasks = db.relationship("Task", backref="user", lazy=True)
     followees = db.relationship(
         "User",

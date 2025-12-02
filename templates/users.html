@@ -34,20 +34,24 @@
 <hr>
 
 <h2>フォロー中のユーザ</h2>
-<ul>
+<ul class="list-group">
     {% for user in followees %}
-        <li>{{ user.lastname }} {{ user.firstname }}（ID: {{ user.id }}）</li>
+        <li class="list-group-item">
+            {{ user.lastname }} {{ user.firstname }}（ID: {{ user.id }}）
+        </li>
     {% else %}
-        <li>フォローしているユーザはいません</li>
+        <li class="list-group-item">フォローしているユーザはいません</li>
     {% endfor %}
 </ul>
 
-<h2>あなたをフォローしているユーザ</h2>
-<ul>
+<h2 class="mt-4">あなたをフォローしているユーザ</h2>
+<ul class="list-group">
     {% for user in followers %}
-        <li>{{ user.lastname }} {{ user.firstname }}（ID: {{ user.id }}）</li>
+        <li class="list-group-item">
+            {{ user.lastname }} {{ user.firstname }}（ID: {{ user.id }}）
+        </li>
     {% else %}
-        <li>フォロワーはいません</li>
+        <li class="list-group-item">フォロワーはいません</li>
     {% endfor %}
 </ul>
-{% endblock content %}
+{% endblock %}
