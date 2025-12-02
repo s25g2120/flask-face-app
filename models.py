@@ -47,6 +47,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.String(255), primary_key=True)  # ユーザID
     password_hash = db.Column(db.String(162), nullable=True)
     lastname = db.Column(db.String(255), nullable=False)
+    firstname = db.Column(db.String(255), nullable=False)
     tasks = db.relationship("Task", backref="user", lazy=True)
     followees = db.relationship(
         "User",
