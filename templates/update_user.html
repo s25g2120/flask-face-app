@@ -50,7 +50,13 @@
 
     <div class="row">
         <div class="col-auto">
-            <input class="btn btn-primary" type="submit" value="更新して登録">
+            <form action="/update_user" method="post">
+                <input class="btn btn-primary" type="submit" value="更新して登録">
+            </form>
+        </div>
+
+        <div class="col-auto">
+            <a href="/delete_user" class="btn btn-danger btn-sm">ユーザ削除</a>
         </div>
     </div>
     <a href="/login">タスク一覧に戻る</a>
