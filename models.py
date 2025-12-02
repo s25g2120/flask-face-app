@@ -20,12 +20,13 @@ class Notification(db.Model):
     __tablename__ = "notifications"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.String(255), db.ForeignKey("users.id"), nullable=False)
+    user_id = db.Column(db.String(255), db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     message = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
     is_read = db.Column(db.Boolean, nullable=False, default=False)
 
-    user = db.relationship("User", backref="notifications")
+    user = db.relationship("User", backref=db.backref("notifications", cascade="all, delete-orphan"))
+
 
 class Task(db.Model):
     # タスクを登録するためのモデル

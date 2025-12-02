@@ -1,9 +1,10 @@
+from datetime import datetime, timedelta
+
 from flask import Flask, flash, redirect, render_template, request
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 from flask_migrate import Migrate
-from models import Task, User, db,Notification
+from models import Notification, Task, User, db
 from werkzeug.security import check_password_hash, generate_password_hash
-from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://db_user:db_password@localhost/app_db"  # 接続先DBを定義
@@ -97,19 +98,17 @@ def create():
         is_shared=request.form.get("is_shared") is not None,
         color=request.form.get("color") or "black",  # ← 色を保存
     )
-    
 
     db.session.add(task)  # 用意したタスクを保存
     db.session.commit()  # 保存した状態をDBに反映
-        # もし共有タスクならフォロワーに通知を送る
+    # もし共有タスクならフォロワーに通知を送る
     if task.is_shared:
         for follower in current_user.followers:  # 自分をフォローしているユーザ
             notification = Notification(
-                user_id=follower.id,
-                message=f"{current_user.id} さんがタスク『{task.name}』を共有しました"
+                user_id=follower.id, message=f"{current_user.id} さんがタスク『{task.name}』を共有しました"
             )
             db.session.add(notification)
-        db.session.commit() 
+        db.session.commit()
     return redirect("/")  # タスク一覧に戻る
 
 
@@ -196,10 +195,7 @@ def follow(user_id):
     if current_user not in user.followers:  # まだフォローしていないなら
         user.followers.append(current_user)  # ユーザのフォロワーに追加
         db.session.commit()  # DBに反映
-        notification = Notification(
-            user_id=user.id,
-            message=f"{current_user.id} さんがあなたをフォローしました"
-        )
+        notification = Notification(user_id=user.id, message=f"{current_user.id} さんがあなたをフォローしました")
         db.session.add(notification)
         db.session.commit()
 
@@ -235,10 +231,26 @@ def update_user():
         return redirect("/")
     return render_template("update_user.html", user=user, title="ユーザ情報の編集")
 
+
+@app.route("/delete_user", methods=["GET", "POST"])
+@login_required
+def delete_user_page():
+    user = current_user
+    if request.method == "GET":
+        return render_template("delete_user.html", title="ユーザ削除確認", user=user)
+
+    db.session.delete(user)
+    db.session.commit()
+    flash("ユーザを削除しました")
+    return redirect("/login")
+
+
 @app.route("/notifications")
 @login_required
 def notifications():
-    notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).all()
+    notifications = (
+        Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).all()
+    )
     for n in notifications:
         if not n.is_read:
             n.is_read = True
@@ -251,25 +263,20 @@ def notifications():
 def check_deadlines():
     if current_user.is_authenticated:
         soon = datetime.now() + timedelta(hours=24)  # 1時間以内
-        tasks = Task.query.filter(
-            Task.user_id == current_user.id,
-            Task.deadline != None,
-            Task.deadline <= soon
-        ).all()
+        tasks = Task.query.filter(Task.user_id == current_user.id, Task.deadline != None, Task.deadline <= soon).all()
 
         for task in tasks:
             # まだ通知がない場合だけ追加
             exists = Notification.query.filter_by(
-                user_id=current_user.id,
-                message=f"タスク『{task.name}』の締切が近づいています"
+                user_id=current_user.id, message=f"タスク『{task.name}』の締切が近づいています"
             ).first()
             if not exists:
                 notification = Notification(
-                    user_id=current_user.id,
-                    message=f"タスク『{task.name}』の締切が近づいています"
+                    user_id=current_user.id, message=f"タスク『{task.name}』の締切が近づいています"
                 )
                 db.session.add(notification)
         db.session.commit()
+
 
 @app.before_request
 def load_unread_notifications():
@@ -277,4 +284,5 @@ def load_unread_notifications():
         unread_count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
         # g に保存してテンプレートで使えるようにする
         from flask import g
+
         g.unread_count = unread_count
