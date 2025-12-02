@@ -14,6 +14,13 @@
             <div class="container-fluid">
                 <a href="/" class="nav-link">タスク一覧</a>
                 <a href="/users" class="nav-link">ユーザ一覧</a>
+                <a href="/notifications" class="nav-link position-relative">
+    <span class="bi bi-bell"></span> 通知
+    {% if g.unread_count > 0 %}
+    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+    {% endif %}
+</a>
+
                 <div class="nav-item">
                     {{ current_user.id }} さん
                     <a href="/update_user"><span class="btn btn-primary btn-sm">ユーザ情報</span></a>
