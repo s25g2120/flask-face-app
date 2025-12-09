@@ -6,6 +6,10 @@
             <div class="form-floating">
                 <input class="form-control" type="text" name="name" id="name" placeholder="タスク名を入力...">
                 <label for="name" class="col-form-label">タスク名</label>
+                <div class="form-floating mt-2">
+                    <textarea class="form-control" name="comment" id="comment" placeholder="タスクの内容を入力..." style="height: 100px;"></textarea>
+                    <label for="comment">タスクの内容</label>
+                </div>
             </div>
         </div>
         <div class="col-auto">
@@ -22,12 +26,12 @@
         <div class="col-auto">
             <div class="form-floating">
                 <select class="form-select" name="color" id="color">
-                <option value="black">黒</option>
-                <option value="red">赤</option>
-                <option value="blue">青</option>
-                <option value="green">緑</option>
-                <option value="orange">オレンジ</option>
-                <option value="gray">グレー</option>
+                    <option value="black">黒</option>
+                    <option value="red">赤</option>
+                    <option value="blue">青</option>
+                    <option value="green">緑</option>
+                    <option value="orange">オレンジ</option>
+                    <option value="gray">グレー</option>
                 </select>
                 <label for="color">色</label>
             </div>
@@ -36,46 +40,76 @@
 </form>
 
 <h2>私のタスク</h2>
-<form action="/delete_bulk_confirm" method="post">
-    <table class="table table-striped table-hover">
-        <thead>
-            <tr>
-                <th><input type="checkbox" id="select_all"></th>
-                <th>id</th>
-                <th>タスク名</th>
-                <th>締切日時</th>
-                <th>共有</th>
-                <th>作成日時</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for task in my_tasks %}
-            <tr>
-                <td><input type="checkbox" name="task_ids" value="{{ task.id }}"></td>
-                <td>{{ task.id }}</td>
-                <td><span style="color: {{ task.color }};">{{ task.name }}</span></td>
-                <td>{% if task.deadline %}{{ task.deadline }}{% endif %}</td>
-                <td>
-                    {% if task.is_shared %}
-                    <span class="badge text-bg-primary">✓</span>
-                    {% endif %}
-                </td>
-                <td>{{ task.created_at }}</td>
-                <td>
-                    <a href="/update/{{ task.id }}"><button class="btn btn-outline-primary btn-sm">更新</button></a>
-                    <a href="/delete/{{ task.id }}"><button class="btn btn-outline-danger btn-sm">削除</button></a>
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="7">表示する情報がありません</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <input type="submit" value="選択したタスクを削除" class="btn btn-danger">
-</form>
+
+
+<div class="mb-3">
+    <button type="button" class="btn btn-outline-primary btn-sm" onclick="showView('table')">テーブル表示</button>
+    <button type="button" class="btn btn-outline-primary btn-sm" onclick="showView('tile')">タイル表示</button>
+</div>
+
+
+<div id="task-table-view">
+    <form action="/delete_bulk_confirm" method="post">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="select_all"></th>
+                    <th>id</th>
+                    <th>タスク名</th>
+                    <th>締切日時</th>
+                    <th>共有</th>
+                    <th>作成日時</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in my_tasks %}
+                <tr>
+                    <td><input type="checkbox" name="task_ids" value="{{ task.id }}"></td>
+                    <td>{{ task.id }}</td>
+                    <td><span style="color: {{ task.color }};">{{ task.name }}</span></td>
+                    <td>{% if task.deadline %}{{ task.deadline }}{% endif %}</td>
+                    <td>
+                        {% if task.is_shared %}
+                        <span class="badge text-bg-primary">✓</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ task.created_at }}</td>
+                    <td>
+                        <a href="/update/{{ task.id }}" class="btn btn-outline-primary btn-sm">更新</a>
+<a href="/delete/{{ task.id }}" class="btn btn-outline-danger btn-sm">削除</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7">表示する情報がありません</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <input type="submit" value="選択したタスクを削除" class="btn btn-danger">
+    </form>
+</div>
+
+
+<div id="task-tile-view" style="display:none;">
+    
+    <div class="task-grid">
+        {% for task in my_tasks %}
+        <div class="task-card" onclick="this.classList.toggle('flipped')">
+            <div class="card-inner">
+                <div class="card-front" style="border-color: {{ task.color }};">
+                    <h5>{{ task.name }}</h5>
+                    <p>{{ task.deadline.strftime('%Y-%m-%d %H:%M') if task.deadline else '期限なし' }}</p>
+                </div>
+                <div class="card-back">
+                    <p>{{ task.comment or 'コメントなし' }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 
 <h2>共有タスク</h2>
 <table class="table table-striped table-hover">

@@ -7,23 +7,34 @@
                 <input class="form-control" type="text" name="name" id="name" value="{{ task.name }}">
                 <label for="name" class="col-form-label">タスク名</label>
             </div>
+        
+        
         </div>
+        <div class="row mt-3">
+            <div class="col">
+                <div class="form-floating">
+                    <textarea class="form-control" name="comment" id="comment" style="height: 100px">{{ task.comment }}</textarea>
+                    <label for="comment" class="col-form-label">内容</label>
+                </div>
+            </div>
+        </div>
+
         <div class="col-auto">
             <div class="form-floating">
                 <input class="form-control" type="datetime-local" name="deadline" id="deadline" 
-                       value="{{ task.deadline|default('', true) }}">
+                    value="{{ task.deadline|default('', true) }}">
                 <label for="deadline" class="col-form-label">締切日時</label>
             </div>
         </div>
         <div class="col-auto">
             <input class="form-check-input" type="checkbox" name="is_shared" id="is_shared" 
-                   {% if task.is_shared %}checked{% endif %}>
+                {% if task.is_shared %}checked{% endif %}>
             <label for="is_shared" class="form-check-label">共有する</label>
         </div>
         <div class="col-auto">
             <div class="form-floating">
                 <select class="form-select" name="color" id="color">
-                    <option value="red" {% if task.color == "black" %}selected{% endif %}>黒</option>
+                    <option value="black" {% if task.color == "black" %}selected{% endif %}>黒</option>
                     <option value="red" {% if task.color == "red" %}selected{% endif %}>赤</option>
                     <option value="blue" {% if task.color == "blue" %}selected{% endif %}>青</option>
                     <option value="green" {% if task.color == "green" %}selected{% endif %}>緑</option>

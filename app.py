@@ -94,6 +94,7 @@ def create():
     task = Task(
         user=current_user,
         name=request.form["name"],
+        comment=request.form["comment"],
         deadline=request.form["deadline"] or None,
         is_shared=request.form.get("is_shared") is not None,
         color=request.form.get("color") or "black",  # ← 色を保存
@@ -112,6 +113,7 @@ def create():
     return redirect("/")  # タスク一覧に戻る
 
 
+
 @app.route("/update/<int:task_id>", methods=["GET", "POST"])
 @login_required
 def update(task_id):  # URL末尾のtask_idを引数task_idとして受け取る
@@ -127,8 +129,7 @@ def update(task_id):  # URL末尾のtask_idを引数task_idとして受け取る
     task.name = request.form["name"]  # フォームの内容でタスク名を更新
     task.deadline = request.form["deadline"] or None  # フォームの内容で締切日時を更新
     task.is_shared = request.form.get("is_shared") is not None  # フォームの内容で締切日時を更新
-    task.color = request.form.get("color") or task.color  # ← 色を更新
-
+    task.comment = request.form["comment"]
     db.session.commit()  # 更新をDBに反映
     return redirect("/")  # 更新をDBに反映
 
@@ -148,6 +149,7 @@ def delete(task_id):  # URL末尾のtask_idを引数task_idとして受け取る
     db.session.delete(task)
     db.session.commit()  # 更新をDBに反映
     return redirect("/")  # タスク一覧に戻る
+
 
 
 @app.route("/delete_bulk_confirm", methods=["POST"])
@@ -219,6 +221,7 @@ def unfollow(user_id):
 @app.route("/update_user", methods=["GET", "POST"])
 @login_required
 def update_user():
+    
     user = current_user
     if request.method == "POST":
         user.firstname = request.form["firstname"]
@@ -286,3 +289,4 @@ def load_unread_notifications():
         from flask import g
 
         g.unread_count = unread_count
+        
