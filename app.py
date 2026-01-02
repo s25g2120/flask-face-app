@@ -16,9 +16,7 @@ from werkzeug.security import check_password_hash, generate_password_hash  # gen
 # アプリ設定
 # ======================
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = (
-    "mysql+pymysql://app_user:app_pass@localhost/app_db?unix_socket=/var/run/mysqld/mysqld.sock"
-)
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024
 app.config.update(
     SESSION_COOKIE_SAMESITE="None",
