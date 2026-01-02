@@ -1,28 +1,38 @@
 {% extends "base.html" %}
 {% block content %}
+
+{# =========================
+   1. タスク新規作成フォーム
+   ========================= #}
 <form action="/create" method="post">
-    <div class="row">
+    <div class="row g-2">
         <div class="col">
             <div class="form-floating">
-                <input class="form-control" type="text" name="name" id="name" placeholder="タスク名を入力...">
-                <label for="name" class="col-form-label">タスク名</label>
-                <div class="form-floating mt-2">
-                    <textarea class="form-control" name="comment" id="comment" placeholder="タスクの内容を入力..." style="height: 100px;"></textarea>
-                    <label for="comment">タスクの内容</label>
-                </div>
+                <input class="form-control" type="text" name="name" id="name" placeholder="タスク名" required>
+                <label for="name">タスク名</label>
+            </div>
+
+            <div class="form-floating mt-2">
+                <textarea class="form-control" name="comment" id="comment" placeholder="タスクの内容" style="height: 100px;"></textarea>
+                <label for="comment">タスクの内容</label>
             </div>
         </div>
+
         <div class="col-auto">
             <div class="form-floating">
-                <input class="form-control" type="datetime-local" name="deadline" id="deadline" required>
-                <label for="deadline" class="col-form-label">締切日時</label>
+                <input class="form-control" type="datetime-local" name="deadline" id="deadline">
+                <label for="deadline">締切日時</label>
             </div>
         </div>
-        <div class="col-auto">
-            <input class="form-check-input" type="checkbox" name="is_shared" id="is_shared">
-            <label for="is_shared" class="form-check-label">共有する</label>
-            <input class="form-control btn btn-primary" type="submit" value="作成">
+
+        <div class="col-auto d-flex align-items-center">
+            <div class="form-check me-3">
+                <input class="form-check-input" type="checkbox" name="is_shared" id="is_shared">
+                <label class="form-check-label" for="is_shared">共有する</label>
+            </div>
+            <input class="btn btn-primary" type="submit" value="作成">
         </div>
+
         <div class="col-auto">
             <div class="form-floating">
                 <select class="form-select" name="color" id="color">
@@ -39,50 +49,59 @@
     </div>
 </form>
 
+<hr>
+
 <h2>タスク一覧</h2>
 
 <div class="mb-3">
-    <button type="button" class="btn btn-outline-primary btn-sm" onclick="showAll('table')">テーブル表示</button>
-    <button type="button" class="btn btn-outline-primary btn-sm" onclick="showAll('tile')">タイル表示</button>
+    <button class="btn btn-outline-primary btn-sm" onclick="showAll('table')">テーブル表示</button>
+    <button class="btn btn-outline-primary btn-sm" onclick="showAll('tile')">タイル表示</button>
 </div>
 
-<!-- 自分のタスク テーブル -->
+{# =========================
+   2. 自分のタスク（テーブル）
+   ========================= #}
 <div id="my-task-table-view">
-    <form action="/delete_bulk_confirm" method="post">
-        <table class="table table-striped table-hover">
-            <thead>
-                <tr>
-                    <th><input type="checkbox" id="select_all"></th>
-                    <th>タスク名</th>
-                    <th>締切日時</th>
-                    <th>共有</th>
-                    <th>作成日時</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for task in my_tasks %}
-                <tr>
-                    <td><input type="checkbox" name="task_ids" value="{{ task.id }}"></td>
-                    <td><span style="color: {{ task.color }};">{{ task.name }}</span></td>
-                    <td>{% if task.deadline %}{{ task.deadline }}{% endif %}</td>
-                    <td>{% if task.is_shared %}<span class="badge text-bg-primary">✓</span>{% endif %}</td>
-                    <td>{{ task.created_at }}</td>
-                    <td>
-                        <a href="/update/{{ task.id }}" class="btn btn-outline-primary btn-sm">更新</a>
-                        <a href="/delete/{{ task.id }}" class="btn btn-outline-danger btn-sm">削除</a>
-                    </td>
-                </tr>
-                {% else %}
-                <tr><td colspan="7">表示する情報がありません</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <input type="submit" value="選択したタスクを削除" class="btn btn-danger">
-    </form>
+<form action="/delete_bulk_confirm" method="post">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th><input type="checkbox" id="select_all"></th>
+                <th>id</th>
+                <th>タスク名</th>
+                <th>締切日時</th>
+                <th>共有</th>
+                <th>作成日時</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in my_tasks %}
+            <tr>
+                <td><input type="checkbox" name="task_ids" value="{{ task.id }}"></td>
+                <td>{{ task.id }}</td>
+                <td><span style="color: {{ task.color }};">{{ task.name }}</span></td>
+                <td>{% if task.deadline %}{{ task.deadline }}{% endif %}</td>
+                <td>{% if task.is_shared %}<span class="badge text-bg-primary">✓</span>{% endif %}</td>
+                <td>{{ task.created_at }}</td>
+                <td>
+                    <a href="/update/{{ task.id }}" class="btn btn-outline-primary btn-sm">更新</a>
+                    <a href="/delete/{{ task.id }}" class="btn btn-outline-danger btn-sm">削除</a>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7">表示する情報がありません</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <input type="submit" value="選択したタスクを削除" class="btn btn-danger">
+</form>
 </div>
 
-<!-- 自分のタスク タイル -->
+{# =========================
+   3. 自分のタスク（タイル）
+   ========================= #}
 <div id="my-task-tile-view" style="display:none;">
     <div class="task-grid">
         {% for task in my_tasks %}
@@ -101,64 +120,60 @@
     </div>
 </div>
 
+<hr>
+
 <h2>共有タスク</h2>
 
-<!-- 共有タスク テーブル -->
+{# =========================
+   4. 共有タスク（テーブル）
+   ========================= #}
 <div id="shared-task-table-view">
-    <table class="table table-striped table-hover">
-        <thead>
-            <tr>
-                <th>id</th>
-                <th>ユーザ</th>
-                <th>タスク名</th>
-                <th>締切日時</th>
-                <th>作成日時</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for task in shared_tasks %}
-            <tr>
-                <td>{{ task.id }}</td>
-                <td>{{ task.user_id }}</td>
-                <td><span style="color: {{ task.color }};">{{ task.name }}</span></td>
-                <td>{% if task.deadline %}{{ task.deadline }}{% endif %}</td>
-                <td>{{ task.created_at }}</td>
-            </tr>
-            {% else %}
-            <tr><td colspan="5">表示する情報がありません</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-<!-- 共有タスク タイル -->
-<div id="shared-task-tile-view" style="display:none;">
-    <div class="task-grid">
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>id</th>
+            <th>ユーザ</th>
+            <th>タスク名</th>
+            <th>締切日時</th>
+            <th>作成日時</th>
+        </tr>
+    </thead>
+    <tbody>
         {% for task in shared_tasks %}
-        <div class="task-card" onclick="this.classList.toggle('flipped')">
-            <div class="card-inner">
-                <div class="card-front" style="border-color: {{ task.color }};">
-                    <h5>{{ task.name }}</h5>
-                    <p>{{ task.deadline.strftime('%Y-%m-%d %H:%M') if task.deadline else '期限なし' }}</p>
-                </div>
-                <div class="card-back">
-                    <p>{{ task.comment or 'コメントなし' }}</p>
-                </div>
-            </div>
-        </div>
+        <tr>
+            <td>{{ task.id }}</td>
+            <td>{{ task.user_id }}</td>
+            <td><span style="color: {{ task.color }};">{{ task.name }}</span></td>
+            <td>{% if task.deadline %}{{ task.deadline }}{% endif %}</td>
+            <td>{{ task.created_at }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5">表示する情報がありません</td></tr>
         {% endfor %}
-    </div>
+    </tbody>
+</table>
 </div>
 
+{# =========================
+   5. JavaScript
+   ========================= #}
 <script>
 function showAll(view) {
-    // 自分のタスク
     document.getElementById('my-task-table-view').style.display = (view === 'table') ? 'block' : 'none';
-    document.getElementById('my-task-tile-view').style.display = (view === 'tile') ? 'block' : 'none';
-
-    // 共有タスク
+    document.getElementById('my-task-tile-view').style.display  = (view === 'tile')  ? 'block' : 'none';
     document.getElementById('shared-task-table-view').style.display = (view === 'table') ? 'block' : 'none';
-    document.getElementById('shared-task-tile-view').style.display = (view === 'tile') ? 'block' : 'none';
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const selectAll = document.getElementById('select_all');
+    if (!selectAll) return;
+
+    selectAll.addEventListener('change', () => {
+        document.querySelectorAll('input[name="task_ids"]').forEach(cb => {
+            cb.checked = selectAll.checked;
+        });
+    });
+});
 </script>
+
 {% endblock content %}

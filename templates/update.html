@@ -1,52 +1,85 @@
 {% extends "base.html" %}
 {% block content %}
+
 <form action="/update/{{ task.id }}" method="post">
-    <div class="row">
-        <div class="col">
+    <div class="row g-3 align-items-end">
+
+        {# 1. タスク名 #}
+        <div class="col-md-4 col-lg-3">
             <div class="form-floating">
-                <input class="form-control" type="text" name="name" id="name" value="{{ task.name }}">
-                <label for="name" class="col-form-label">タスク名</label>
-            </div>
-        
-        
-        </div>
-        <div class="row mt-3">
-            <div class="col">
-                <div class="form-floating">
-                    <textarea class="form-control" name="comment" id="comment" style="height: 100px">{{ task.comment }}</textarea>
-                    <label for="comment" class="col-form-label">内容</label>
-                </div>
+                <input class="form-control"
+                       type="text"
+                       name="name"
+                       id="name"
+                       value="{{ task.name }}"
+                       placeholder="タスク名を入力">
+                <label for="name">タスク名</label>
             </div>
         </div>
 
-        <div class="col-auto">
+        {# 2. 締切日時 #}
+        <div class="col-md-4 col-lg-3">
             <div class="form-floating">
-                <input class="form-control" type="datetime-local" name="deadline" id="deadline" 
-                    value="{{ task.deadline|default('', true) }}">
-                <label for="deadline" class="col-form-label">締切日時</label>
+                <input class="form-control"
+                       type="datetime-local"
+                       name="deadline"
+                       id="deadline"
+                       value="{{ task.deadline|default('', true) }}"
+                       placeholder="締切日時">
+                <label for="deadline">締切日時</label>
             </div>
         </div>
-        <div class="col-auto">
-            <input class="form-check-input" type="checkbox" name="is_shared" id="is_shared" 
-                {% if task.is_shared %}checked{% endif %}>
-            <label for="is_shared" class="form-check-label">共有する</label>
-        </div>
-        <div class="col-auto">
+
+        {# 3. 色選択 #}
+        <div class="col-md-4 col-lg-2">
             <div class="form-floating">
                 <select class="form-select" name="color" id="color">
-                    <option value="black" {% if task.color == "black" %}selected{% endif %}>黒</option>
-                    <option value="red" {% if task.color == "red" %}selected{% endif %}>赤</option>
-                    <option value="blue" {% if task.color == "blue" %}selected{% endif %}>青</option>
-                    <option value="green" {% if task.color == "green" %}selected{% endif %}>緑</option>
+                    <option value="black"  {% if task.color == "black" %}selected{% endif %}>黒</option>
+                    <option value="red"    {% if task.color == "red" %}selected{% endif %}>赤</option>
+                    <option value="blue"   {% if task.color == "blue" %}selected{% endif %}>青</option>
+                    <option value="green"  {% if task.color == "green" %}selected{% endif %}>緑</option>
                     <option value="orange" {% if task.color == "orange" %}selected{% endif %}>オレンジ</option>
-                    <option value="gray" {% if task.color == "gray" %}selected{% endif %}>グレー</option>
+                    <option value="gray"   {% if task.color == "gray" %}selected{% endif %}>グレー</option>
                 </select>
                 <label for="color">色</label>
             </div>
         </div>
+
+        {# 4. 共有チェック #}
         <div class="col-auto">
-            <input class="form-control btn btn-primary" type="submit" value="更新">
+            <div class="form-check mt-2">
+                <input class="form-check-input"
+                       type="checkbox"
+                       name="is_shared"
+                       id="is_shared"
+                       {% if task.is_shared %}checked{% endif %}>
+                <label for="is_shared" class="form-check-label">
+                    共有する
+                </label>
+            </div>
+        </div>
+
+        {# 5. 更新ボタン #}
+        <div class="col-auto">
+            <input class="btn btn-primary" type="submit" value="更新">
+        </div>
+    </div>
+
+    {# ===== 新機能：内容（comment） ===== #}
+    <div class="row mt-3">
+        <div class="col">
+            <div class="form-floating">
+                <textarea class="form-control"
+                          name="comment"
+                          id="comment"
+                          style="height:100px"
+                          placeholder="内容を入力">{{ task.comment }}</textarea>
+                <label for="comment">内容</label>
+            </div>
         </div>
     </div>
 </form>
+
+<a href="/" class="btn btn-link mt-3">タスク一覧に戻る</a>
+
 {% endblock content %}

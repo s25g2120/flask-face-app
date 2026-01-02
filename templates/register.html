@@ -1,48 +1,214 @@
 {% extends "base.html" %}
 {% block content %}
+
 <h1>{{ title }}</h1>
-<form action="/register" method="post">
-    <div class="row">
-        <p>すべて必須項目です</p>
-    </div>
-    <div class="row">
+<form action="/register" method="post" id="userForm">
+    
+    {# --- ユーザー情報入力フィールド --- #}
+    <div class="row mt-2">
         <div class="col-auto">
             <div class="form-floating">
-                <input class="form-control" type="text" name="id" id="id" placeholder="ユーザIDを入力...">
-                <label for="id" class="col-form-label">ユーザID</label>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-auto">
-            <div class="form-floating">
-                <input class="form-control" type="password" name="password" id="password" placeholder="パスワードを入力...">
-                <label for="password" class="col-form-label">パスワード</label>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-auto">
-            <div class="form-floating">
-                <input class="form-control" type="text" name="lastname" id="lastname" placeholder="姓を入力...">
-                <label for="lastname" class="col-form-label">姓</label>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-auto">
-            <div class="form-floating">
-                <input class="form-control" type="text" name="firstname" id="firstname" placeholder="名を入力...">
-                <label for="firstname" class="col-form-label">名</label>
+                <input class="form-control" type="text" name="id" id="id" placeholder="ユーザIDを入力..." required>
+                <label for="id">ユーザID</label>
             </div>
         </div>
     </div>
 
-    <div class="row">
+    <div class="row mt-2">
         <div class="col-auto">
-            <input class="btn btn-primary" type="submit" value="登録">
+            <div class="form-floating">
+                <input class="form-control" type="password" name="password" id="password" placeholder="パスワードを入力..." required>
+                <label for="password">パスワード</label>
+            </div>
         </div>
     </div>
+
+    <div class="row mt-2">
+        <div class="col-auto">
+            <div class="form-floating">
+                <input class="form-control" type="text" name="lastname" id="lastname" placeholder="姓を入力..." required>
+                <label for="lastname">姓</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        <div class="col-auto">
+            <div class="form-floating">
+                <input class="form-control" type="text" name="firstname" id="firstname" placeholder="名を入力..." required>
+                <label for="firstname">名</label>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-3">
+
+    {# --- 顔認証登録セクション --- #}
+    <div class="row mt-2">
+        <div class="col-12">
+            <h2>顔の登録</h2>
+            <button type="button" class="btn btn-warning" id="face_btn">顔情報登録</button>
+            <p id="progressText" style="margin-top:8px;">※登録ボタンを押す前に顔情報を登録してください</p>
+            
+            <div id="faceContainer" style="position:relative; width:320px; height:240px; margin-top:8px; display:none;">
+                <video id="webcam" autoplay playsinline style="width:320px; height:240px; transform: scaleX(-1);"></video>
+                <canvas id="faceCanvas" width="320" height="240" style="position:absolute; top:0; left:0; pointer-events:none;"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <hr class="my-3"> {# --- 登録ボタン --- #}
+    <div class="row mt-4">
+        <div class="col-auto">
+            <input class="btn btn-primary" type="submit" value="登録" id="submit_btn" disabled>
+        </div>
+    </div>
+
     <a href="/login">登録済みの方はこちら</a>
 </form>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    let capturedImages = [];
+    const faceBtn = document.getElementById('face_btn');
+    const progressText = document.getElementById('progressText');
+    const faceContainer = document.getElementById('faceContainer');
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('faceCanvas');
+    const ctx = canvas.getContext('2d');
+    const submitBtn = document.getElementById('submit_btn');
+    const form = document.getElementById('userForm');
+
+    let stream = null;
+    let frameCount = 0;
+    const totalFrames = 60; 
+    
+    // 必須入力フィールドのリスト
+    const requiredInputs = form.querySelectorAll('input[required]');
+
+    // --- A. ボタン有効化/無効化のチェック関数 ---
+    function updateSubmitButtonState() {
+        let allInputsFilled = true;
+        requiredInputs.forEach(input => {
+            if (input.value.trim() === '') {
+                allInputsFilled = false;
+            }
+        });
+        
+        const faceDataReady = capturedImages.length >= 3;
+        submitBtn.disabled = !(allInputsFilled && faceDataReady);
+    }
+
+    // --- B. ユーザー入力と Hidden フィールドの変更時にチェック ---
+    requiredInputs.forEach(input => {
+        input.addEventListener('input', updateSubmitButtonState);
+    });
+    
+    // 初期チェック (ページロード時)
+    updateSubmitButtonState(); 
+
+    // カメラストリームの停止関数
+    function stopCamera() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
+    }
+
+    faceBtn.addEventListener('click', async () => {
+        // ... (カメラ起動ロジックは変更なし) ...
+        faceContainer.style.display = "block";
+        faceBtn.disabled = true;
+        progressText.textContent = "顔を枠に合わせてください (撮影中...)";
+        faceContainer.scrollIntoView({ behavior: "smooth", block: "center" });
+        
+        frameCount = 0;
+        updateSubmitButtonState(); // ボタンを無効化
+
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+            video.srcObject = stream;
+            await video.play(); 
+            requestAnimationFrame(drawLoop);
+        } catch (e) {
+            console.error("カメラ起動エラー:", e);
+            progressText.textContent = "カメラ起動に失敗しました。";
+            faceBtn.disabled = false;
+            faceContainer.style.display = "none";
+        }
+    });
+
+    // --- C. 描画ループ ---
+    function drawLoop() {
+        if (capturedImages.length >= 3 || !stream) return;
+ // 既に完了していたら終了
+
+        const cx = canvas.width/2, cy = canvas.height/2, radius = 100, numBars = totalFrames;
+        const progress = frameCount / totalFrames;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // 🌟 修正点1: キャンバスに描画する際、鏡面反転を適用する
+        ctx.save();
+        ctx.scale(-1, 1);
+        ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height); 
+        ctx.restore();
+
+        // プログレスリングの描画
+        for(let i=0; i < numBars; i++){
+            const angle = (i/numBars)*2*Math.PI - Math.PI/2;
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(angle)*radius, cy + Math.sin(angle)*radius);
+            ctx.lineTo(cx + Math.cos(angle)*(radius+15), cy + Math.sin(angle)*(radius+15));
+            ctx.strokeStyle = (i/numBars < progress) ? "rgba(0,255,120,0.9)" : "rgba(255,255,255,0.2)";
+            ctx.lineWidth = 4;
+            ctx.stroke();
+        }
+
+        frameCount++;
+        
+        if (frameCount >= totalFrames) {
+            // 撮影完了
+            progressText.textContent = "顔情報取得完了！";
+
+            capturedImages = [];
+
+            // ★ 同じ映像から3枚生成（UIそのまま）
+            for (let i = 0; i < 3; i++) {
+                const tmpCanvas = document.createElement('canvas');
+                tmpCanvas.width = canvas.width;
+                tmpCanvas.height = canvas.height;
+                const tmpCtx = tmpCanvas.getContext('2d');
+
+                tmpCtx.scale(-1, 1);
+                tmpCtx.drawImage(video, -tmpCanvas.width, 0, tmpCanvas.width, tmpCanvas.height);
+
+                capturedImages.push(tmpCanvas.toDataURL('image/jpeg'));
+            }
+
+            // ★ 既存 hidden input を削除
+            document.querySelectorAll('input[name="face_data[]"]').forEach(e => e.remove());
+
+            // ★ 3枚分 hidden input を追加
+            capturedImages.forEach(img => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'face_data[]';
+                input.value = img;
+                form.appendChild(input);
+            });
+
+            stopCamera();
+            faceContainer.style.display = "none";
+            faceBtn.disabled = false;
+
+            submitBtn.disabled = false;
+            submitBtn.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        } else {
+            requestAnimationFrame(drawLoop);
+        }
+
+    }
+});
+</script>
 {% endblock content %}

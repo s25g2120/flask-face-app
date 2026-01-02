@@ -1,16 +1,28 @@
 {% extends "base.html" %}
 {% block content %}
+
 <h1>{{ title }}</h1>
+
 <form action="/delete_user" method="post">
+
     <div class="row">
-        <p class="text-danger">この操作は取り消せません。ユーザ情報を削除してもよろしいですか？</p>
+        <p class="text-danger">
+            この操作は取り消せません。ユーザ情報を削除してもよろしいですか？
+        </p>
     </div>
 
     <div class="row">
         <div class="col-auto">
             <div class="form-floating">
-                <input class="form-control" type="text" name="id" id="id" value="{{ user.id }}" readonly>
-                <label for="id" class="col-form-label">ユーザID（削除対象）</label>
+                <input
+                    class="form-control"
+                    type="text"
+                    name="id"
+                    id="id"
+                    value="{{ user.id }}"
+                    readonly
+                >
+                <label for="id">ユーザID（削除対象）</label>
             </div>
         </div>
     </div>
@@ -18,8 +30,12 @@
     <div class="row mt-3">
         <div class="col-auto">
             <label>
-                <input type="checkbox" name="confirm" required>本当に削除することを確認しました。<p>
-                <input type="checkbox" name="confirm" required>共有タスクも削除されることを確認しました。
+                <input type="checkbox" name="confirm" required>
+                本当に削除することを確認しました。
+            </label><br>
+            <label>
+                <input type="checkbox" name="confirm" required>
+                共有タスクも削除されることを確認しました。
             </label>
         </div>
     </div>
@@ -32,5 +48,7 @@
             <a href="/login" class="btn btn-secondary">キャンセル</a>
         </div>
     </div>
+
 </form>
+
 {% endblock content %}

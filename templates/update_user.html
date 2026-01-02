@@ -1,64 +1,309 @@
 {% extends "base.html" %}
 {% block content %}
+
 <h1>{{ title }}</h1>
-<form action="/update_user" method="post">
-    <div class="row">
-        <p>すべて必須項目です</p>
+
+{# 名前・パスワード更新フォーム #}
+<form action="/update_user" method="post" id="userForm">
+    <div class="row mb-3">
     </div>
-    <div class="row">
+
+    {# --- ユーザID (変更不可) --- #}
+    <div class="row mb-3">
         <div class="col-auto">
             <div class="form-floating">
                 <input class="form-control" type="text" name="id" id="id" value="{{ user.id }}" readonly>
-                <label for="id" class="col-form-label">ユーザID（変更不可）</label>
+                <label for="id">ユーザID（変更不可）</label>
             </div>
         </div>
     </div>
-    <div class="row">
+
+    {# --- パスワード更新 --- #}
+    <div class="row mb-3">
         <div class="col-auto">
-            <div class="form-floating">
+            <div class="form-floating position-relative">
                 <input class="form-control" type="password" name="password" id="password" placeholder="新しいパスワードを入力...">
-                <label for="password" class="col-form-label">パスワード（更新であれば入力）</label>
-                <button type="button" onmousedown="showPassword()" onmouseup="hidePassword()" onmouseleave="hidePassword()" class="btn btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-2" onclick="togglePassword()" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); background: none; border: none; font-size: 1.2rem; cursor: pointer; z-index: 2;">🙈</button>
+                <label for="password">パスワード（更新であれば入力）</label>
+                {# パスワード表示/非表示ボタン #}
+                <button type="button" onmousedown="showPassword()" onmouseup="hidePassword()" onmouseleave="hidePassword()" class="btn btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-2" style="background:none; border:none; font-size:1.2rem; cursor:pointer; z-index:2;">🙈</button>
             </div>
-            <script>
-            function showPassword() {
-                document.getElementById("password").type = "text";
-            }
-            function hidePassword() {
-                document.getElementById("password").type = "password";
-            }
-            </script>
-
         </div>
     </div>
-    <div class="row">
+
+    <script>
+        // パスワード表示/非表示用のヘルパー関数
+        function showPassword(){document.getElementById("password").type="text";}
+        function hidePassword(){document.getElementById("password").type="password";}
+    </script>
+
+    {# --- 名前更新 --- #}
+    <div class="row mb-3">
         <div class="col-auto">
             <div class="form-floating">
-                <input class="form-control" type="text" name="lastname" id="lastname"   value="{{ user.lastname }}" required placeholder="姓を入力...">
-                <label for="lastname" class="col-form-label">姓</label>
+                <input class="form-control" type="text" name="lastname" id="lastname" value="{{ user.lastname }}" required>
+                <label for="lastname">姓</label>
             </div>
         </div>
     </div>
-    <div class="row">
+    <div class="row mb-3">
         <div class="col-auto">
             <div class="form-floating">
-                <input class="form-control" type="text" name="firstname" id="firstname" value="{{ user.firstname }}" required placeholder="名を入力...">
-                <label for="firstname" class="col-form-label">名</label>
+                <input class="form-control" type="text" name="firstname" id="firstname" value="{{ user.firstname }}" required>
+                <label for="firstname">名</label>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-auto">
-            <form action="/update_user" method="post">
-                <input class="btn btn-primary" type="submit" value="更新して登録">
-            </form>
-        </div>
+    <hr class="my-4">
 
-        <div class="col-auto">
-            <a href="/delete_user" class="btn btn-danger btn-sm">ユーザ削除</a>
+    {# --- 顔認証再登録セクション --- #}
+    <div class="row mt-4">
+        <div class="col-12">
+            <h3>顔認証情報の更新</h3>
         </div>
     </div>
-    <a href="/login">タスク一覧に戻る</a>
+
+    <button type="button" id="startFaceBtn" class="btn btn-warning mb-3">新しい顔を登録</button>
+
+    <div class="row mb-3">
+        <div class="col-12 text-center">
+            {# 顔認証用コンテナ #}
+            <div id="faceContainer" style="position:relative; width:400px; height:400px; margin:auto; display:none;">
+                <video id="webcam" autoplay playsinline style="width:400px; height:400px;"></video>
+                <canvas id="faceCanvas" width="400" height="400" style="position:absolute; top:0; left:0; border-radius:20px; pointer-events:none; z-index:999;"></canvas>
+            </div>
+            <p id="progressText" style="font-size:16px; margin-top:8px;">顔認証開始ボタンを押してください</p>
+        </div>
+    </div>
+    
+    <input type="hidden" id="faceImage" name="face_image_dataurl" value="">
+
+    {# --- 操作ボタン --- #}
+    <div class="row mt-4">
+        <div class="col-auto">
+            <input class="btn btn-primary" type="submit" id="updateSubmitBtn" value="更新して登録" disabled>
+        </div>
+        <div class="col-auto">
+            <a href="/delete_user_page" class="btn btn-danger">ユーザ削除</a>
+        </div>
+    </div>
+
+    <a href="/" class="btn btn-link">タスク一覧に戻る</a>
 </form>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const startBtn = document.getElementById('startFaceBtn');
+    const updateSubmitBtn = document.getElementById('updateSubmitBtn');
+    const form = document.getElementById('userForm');
+    const faceImageInput = document.getElementById('faceImage'); // hiddenフィールド
+
+    const formInputs = form.querySelectorAll('input[type="text"]:not([readonly]), input[type="password"]');
+
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('faceCanvas');
+    const ctx = canvas.getContext('2d');
+    const faceContainer = document.getElementById('faceContainer');
+    const progressText = document.getElementById('progressText');
+
+    // フォームの初期値（変更監視用）
+    const initialFormState = {};
+    formInputs.forEach(input => {
+        initialFormState[input.id] = input.type === 'password' ? '' : input.value;
+    });
+
+    let progress = 0;
+    let stream = null;
+    let faceCaptureCompleted = false; // 顔認証成功フラグ
+
+    // カメラストリーム停止ヘルパー
+    function stopCamera() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
+    }
+    
+    // --- フォーム変更監視とボタン有効化ロジック ---
+    function checkFormChanged() {
+        let formChanged = false;
+        formInputs.forEach(input => {
+            const currentValue = input.type === 'password' && input.value === '' ? '' : input.value;
+            if (currentValue !== initialFormState[input.id]) {
+                formChanged = true;
+            }
+        });
+        
+        // 【修正】フォーム内容の変更、または顔画像が取得されている場合、ボタンを有効化
+        const faceChanged = faceImageInput.value !== '';
+        updateSubmitBtn.disabled = !(formChanged || faceChanged);
+        startBtn.disabled = false;
+    }
+
+    formInputs.forEach(input => {
+        input.addEventListener('input', checkFormChanged);
+    });
+    // Hiddenフィールドの内容が変更されたときもボタンをチェック (キャプチャ完了時)
+    faceImageInput.addEventListener('change', checkFormChanged); 
+    checkFormChanged(); // 初期チェック
+    
+    // --- フォーム送信時の処理 ("更新して登録"ボタン) ---
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // 変更がない場合は送信しない
+        if (updateSubmitBtn.disabled) {
+             alert("変更がありません。");
+             return;
+        }
+        
+        // 顔情報がキャプチャされていれば即座に送信。キャプチャされていなくても、名前/パスワードが変わっていれば送信する
+        submitFormWithFaceData();
+    });
+
+    // --- カメラ/顔認証開始ヘルパー関数 ---
+    async function startFaceAuthentication() {
+        faceContainer.style.display = "block";
+        faceContainer.scrollIntoView({ behavior: "smooth", block: "center" });
+        updateSubmitBtn.disabled = true; 
+        startBtn.disabled = true;
+        progressText.textContent = "カメラ起動中...";
+        progress = 0;
+        faceCaptureCompleted = false; // 新しいキャプチャ開始
+
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+            video.srcObject = stream;
+            
+            video.onloadedmetadata = () => {
+                video.play();
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                requestAnimationFrame(() => drawLoop()); 
+            };
+        } catch(e) {
+            progressText.textContent = "カメラ起動に失敗しました。";
+            checkFormChanged(); // ボタンをリセット
+            console.error(e);
+        }
+    }
+
+    // --- 新しい顔を登録ボタンの処理 ---
+    startBtn.addEventListener('click', async () => {
+        // 顔認証を開始するが、完了しても自動送信はしない
+        startFaceAuthentication(); 
+    });
+
+
+    // --- フォームデータ送信関数 (顔情報を含む可能性あり) ---
+    function submitFormWithFaceData() {
+        progressText.textContent = "更新情報をサーバーに送信中...";
+        
+        // Hiddenフィールド (faceImageInput) の値が送信される
+        const formData = new FormData(form); 
+
+        fetch(form.action, {
+            method:'POST',
+            body: formData 
+        }).then(res => res.json()).then(data => {
+            if (data.success) {
+                alert("ユーザ情報を更新しました！");
+                
+                // 成功時の初期値リセット処理
+                formInputs.forEach(input => {
+                    if (input.type === 'password') {
+                        initialFormState[input.id] = '';
+                    } else {
+                        initialFormState[input.id] = input.value;
+                    }
+                });
+                faceImageInput.value = ''; // 顔データクリア
+                window.location.href = data.redirect_url || "/"; 
+            } else {
+                alert(data.message || "更新に失敗しました。");
+                faceCaptureCompleted = false;
+                progressText.textContent = data.message || "更新に失敗しました。";
+                checkFormChanged(); 
+            }
+        }).catch(err=>{
+            console.error("更新エラー:", err);
+            alert("サーバーとの通信エラーが発生しました。");
+            faceCaptureCompleted = false;
+            progressText.textContent = "サーバーとの通信エラーが発生しました。";
+            checkFormChanged();
+        });
+    }
+
+
+    function drawLoop() {
+        if (faceCaptureCompleted || !stream) {
+            stopCamera();
+            return;
+        }
+        
+        progress = Math.min(progress + 0.01, 1);
+
+        // --- 映像とプログレスリングの描画 ---
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // 映像を描画 (鏡面反転)
+        ctx.save();
+        ctx.scale(-1,1);
+        ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+        ctx.restore();
+
+        // プログレスリングの描画 (省略)
+        // ... (前回の drawLoop のプログレスリング描画ロジックをここに挿入) ...
+        const cx = canvas.width/2, cy = canvas.height/2, radius = canvas.width*0.35, numBars=60;
+        for(let i=0;i<numBars;i++){
+            const angle = (i/numBars)*2*Math.PI - Math.PI/2;
+            ctx.beginPath();
+            ctx.moveTo(cx+Math.cos(angle)*radius, cy+Math.sin(angle)*radius);
+            ctx.lineTo(cx+Math.cos(angle)*(radius+22), cy+Math.sin(angle)*(radius+22));
+            
+            if(i/numBars < progress){
+                ctx.strokeStyle = "rgba(0,255,120,0.95)";
+                ctx.lineWidth = 6;
+                ctx.shadowColor = "rgba(0,255,120,0.9)";
+                ctx.shadowBlur = 18;
+            } else {
+                ctx.strokeStyle = "rgba(255,255,255,0.18)";
+                ctx.lineWidth = 3;
+                ctx.shadowBlur = 0;
+            }
+            ctx.lineCap = "round";
+            ctx.stroke();
+        }
+
+
+        progressText.textContent = `顔情報取得中... 進捗: ${Math.round(progress*100)}%`;
+
+        // --- 顔認証完了時の処理 ---
+        if(progress >= 1 && !faceCaptureCompleted){
+            faceCaptureCompleted = true;
+            progressText.textContent = "顔情報取得完了！「更新して登録」を押してください。";
+            
+            // 撮影データを作成し、hiddenフィールドに格納
+            const tmp = document.createElement('canvas');
+            tmp.width = video.videoWidth;
+            tmp.height = video.videoHeight;
+            const tmpCtx = tmp.getContext('2d');
+            tmpCtx.scale(-1,1);
+            tmpCtx.drawImage(video, -tmp.width, 0, tmp.width, tmp.height);
+            
+            // Hiddenフィールドに値を設定し、changeイベントを発火させてボタンを有効化
+            faceImageInput.value = tmp.toDataURL('image/jpeg');
+            faceImageInput.dispatchEvent(new Event('change'));
+
+            stopCamera();
+            faceContainer.style.display = "none";
+            
+            alert("新しい顔情報が一時的に保存されました。「更新して登録」ボタンを押して完了してください。");
+        } else {
+            // 次のフレームへ
+            requestAnimationFrame(() => drawLoop());
+        }
+    }
+});
+</script>
 {% endblock content %}

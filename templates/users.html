@@ -1,10 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
+
 <h1>ユーザ一覧</h1>
-<table>
+
+{# --- 1. 全ユーザ一覧 --- #}
+<table class="table table-striped table-hover">
     <thead>
         <tr>
-            <th>id</th>
+            <th>ID</th>
             <th>氏名</th>
             <th>操作</th>
         </tr>
@@ -16,16 +19,25 @@
             <td>{{ user.lastname }} {{ user.firstname }}</td>
             <td>
                 {% set follower_list = user.followers.all() if user.followers.all is defined else user.followers %}
+                
                 {% if current_user in follower_list %}
-                    <a href="/unfollow/{{ user.id }}">フォロー解除</a>
+                    <a href="/unfollow/{{ user.id }}"
+                       class="btn btn-outline-danger btn-sm">
+                        フォロー解除
+                    </a>
                 {% else %}
-                    <a href="/follow/{{ user.id }}">フォローする</a>
+                    <a href="/follow/{{ user.id }}"
+                       class="btn btn-primary btn-sm">
+                        フォローする
+                    </a>
                 {% endif %}
             </td>
         </tr>
         {% else %}
         <tr>
-            <td colspan="3">表示する情報がありません</td>
+            <td colspan="3" class="text-muted">
+                表示する情報がありません
+            </td>
         </tr>
         {% endfor %}
     </tbody>
@@ -33,25 +45,34 @@
 
 <hr>
 
+{# --- 2. フォロー中のユーザ --- #}
 <h2>フォロー中のユーザ</h2>
 <ul class="list-group">
     {% for user in followees %}
         <li class="list-group-item">
-            {{ user.lastname }} {{ user.firstname }}（ID: {{ user.id }}）
+            {{ user.lastname }} {{ user.firstname }}
+            （ID: {{ user.id }}）
         </li>
     {% else %}
-        <li class="list-group-item">フォローしているユーザはいません</li>
+        <li class="list-group-item text-muted">
+            フォローしているユーザはいません
+        </li>
     {% endfor %}
 </ul>
 
+{# --- 3. フォロワー --- #}
 <h2 class="mt-4">あなたをフォローしているユーザ</h2>
 <ul class="list-group">
     {% for user in followers %}
         <li class="list-group-item">
-            {{ user.lastname }} {{ user.firstname }}（ID: {{ user.id }}）
+            {{ user.lastname }} {{ user.firstname }}
+            （ID: {{ user.id }}）
         </li>
     {% else %}
-        <li class="list-group-item">フォロワーはいません</li>
+        <li class="list-group-item text-muted">
+            フォロワーはいません
+        </li>
     {% endfor %}
 </ul>
+
 {% endblock %}

@@ -1,0 +1,9 @@
+flask
+flask-login
+flask-migrate
+flask-sqlalchemy
+pymysql
+face-recognition
+numpy
+pillow
+gunicorn
